@@ -1,67 +1,52 @@
- const express = require('express')
-const app = express()
-const bodyParser = require("body-parser");
-const port = 8080
-app.use(express.urlencoded());
+ 
+// const express = require('express');
+// const app = express();
+// const mongoose = require('mongoose');
+// const users   =require("../models/user.js");
 
-// Parse JSON bodies (as sent by API clients)
+// //Router Middlewares
+// app.use(express.json());
+
+// //Type of query (Hint)
+
+// /*
+
+// 1. / --> this means we need to consider all users
+// 2. /?name=swa --> Will return count of all the user name that have prefix swa. We will (Swaraj Jain, Swarak agrawal, etc). 
+// 3. /?name= -->this means we need to consider all users
+
+// */
+
+
+// // Complete this Route which will return the count of Number of Prefixmatch for the name in the query/
+
+// app.get("/",async function(req,res){
+
+//     var count = 0;
+
+//     //Write you code here
+//     //update count variable
+
+//     res.send(JSON.stringify(count));
+
+// });
+
+// module.exports = app;
+
+
+const express = require('express');
+const app = express();
+const mongoose = require('mongoose');
+const users = require("../models/user.js");
+
+// Router Middlewares
 app.use(express.json());
-const { data } = require('./data')
-//const data = require('./data');
-app.use(bodyParser.urlencoded({ extended: false }))
 
-app.use(bodyParser.json())
-// your code goes here
-
-function offsetf(offset)  {
-    if(offset === 0 || isNaN(offset)) {
-        return 0;
-    } else {
-        return offset;
-    }
-}
-
-function  limitf(limit){
-    if(limit === 0 || isNaN(limit)) {
-        return 20;
-    } else {
-        return limit;
-    }
-}
-
-
-app.get("/topRankings", (req, res) => {
-    let limit = Number(req.query.limit);
-    let offset = Number(req.query.offset);
-    
-    const list = [];
-    limit = limitf(limit);
-    offset = offsetf(offset);
-   
-    console.log(limit);
-    console.log(offset);
-
-
-    for(let i = offset; i < offset+limit; i++) {
-        list.push(data[i]);
-    }
-    res.send(list);
-})
-
-
-
-// app.get('/topRankings',(req,res)=>{
-//    // console.log(data);
-//  let limit = req.query.limit;
-//  let offset = req.query.offset
-//  console.log(offset);
-//  console.log(limit);
-
-//  const datas = data.find().limit(limit).skip(offset)
-//    res.status(200).send(datas);
-// })
-
-
-app.listen(port, () => console.log(`App listening on port ${port}!`))
+// Route to get the count of users whose name starts with the given prefix
+app.get("/", async function(req, res) {
+  let namePrefix = req.query.name || "";
+  let count = await users.countDocuments({ name: { $regex: "^" + namePrefix, $options: "i" } });
+  res.send(JSON.stringify(count));
+});
 
 module.exports = app;
